@@ -1,0 +1,53 @@
+Current version 0.0.11
+
+Setup
+Step 1: Setup StagingBuildCredetials
+Step 2: From Menubar, ReadyGamesNetwork/Set Staging
+Step 3: Load Demo scene can be found under ReadyGamesNetwork/Example/DEMO
+
+Change Log: v0.0.11
+- Removed the avatar module dependencies
+- Refactored existing modules to folders/namespaces
+- Optimizations
+- Removed unused old APIs
+- Renamed few modules
+
+Change Log: v0.0.10
+- Minor game module changes
+
+Change Log: v0.0.9
+- Major authentication fix
+
+Change Log: v0.0.8
+- Minor fixes
+
+Change Log: v0.0.7
+- New Features
+    - Wallets/NFT System
+
+Change Log : v0.0.6
+- Bug Fixing (Refactor)
+
+Change Log : v0.0.5
+- New Features
+    - NFT attribute value in SDK
+
+Change Log : v0.0.4
+- New Features
+    - Game Item Upgrade System
+
+Change Log : v0.0.3
+- Bug fixing
+
+Change Log : v0.0.2
+- Introduced RGNAppId.
+- RGNCoreBuilder.Build() required third parameter called RGNAppId.
+- RGNAppId needs to setup in ApplicationIdntifier Scriptable Object and pass that ref in RGNCoreBuilder.Build() method
+- New Features
+    - Curenncy Store
+    - Managed IAP
+    - Managed Items Store (Can be Buy with coins, Can be Equip)
+    - Game Progression (Level upgrade and reward currency on level complete)
+
+
+
