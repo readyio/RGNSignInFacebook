@@ -1,7 +1,7 @@
 {
   "name": "io.getready.rgn.signin.facebook",
   "displayName": "Ready Games Network SDK. SignIn Facebook",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "unity": "2020.3",
   "description": "The Ready Games Network (RGN) is building mobile-first Web3 tools and technologies to democratize access to game creation.",
   "author": {
@@ -28,6 +28,6 @@
     "/Runtime.meta"
   ],
   "dependencies": {
-    "io.getready.rgn.core": "0.0.12"
+    "io.getready.rgn.core": "0.0.14"
   }
 }

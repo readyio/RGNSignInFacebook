@@ -29,6 +29,7 @@ namespace RGN.Modules.FacebookSignIn
                 FB.ActivateApp();
             }
         }
+        public void Dispose() { }
 
         private void InitCallback()
         {
@@ -134,9 +135,9 @@ namespace RGN.Modules.FacebookSignIn
         {
             rgnCore.Dependencies.Logger.Log("[RGNManager]: FB, Attempting to sign with Facebook...");
 
-            var credential = rgnCore.auth.faceBookAuthProvider.GetCredential(accessToken);
+            var credential = rgnCore.Auth.faceBookAuthProvider.GetCredential(accessToken);
 
-            rgnCore.auth.CurrentUser.LinkAndRetrieveDataWithCredentialAsync(credential).ContinueWith(task =>
+            rgnCore.Auth.CurrentUser.LinkAndRetrieveDataWithCredentialAsync(credential).ContinueWith(task =>
             {
                 if (task.IsCanceled)
                 {
@@ -180,9 +181,9 @@ namespace RGN.Modules.FacebookSignIn
                     return;
                 }
 
-                rgnCore.Dependencies.Logger.Log("LinkWith Facebook Successful. " + rgnCore.auth.CurrentUser.UserId + " ");
+                rgnCore.Dependencies.Logger.Log("LinkWith Facebook Successful. " + rgnCore.Auth.CurrentUser.UserId + " ");
 
-                rgnCore.auth.CurrentUser.TokenAsync(false).ContinueWith(task1 =>
+                rgnCore.Auth.CurrentUser.TokenAsync(false).ContinueWith(task1 =>
                 {
                     if (task1.IsCanceled)
                     {
@@ -210,9 +211,9 @@ namespace RGN.Modules.FacebookSignIn
         {
             rgnCore.Dependencies.Logger.Log("[RGNManager]: FB, Attempting to sign with Facebook...");
 
-            var credential = rgnCore.auth.faceBookAuthProvider.GetCredential(accessToken);
+            var credential = rgnCore.Auth.faceBookAuthProvider.GetCredential(accessToken);
 
-            rgnCore.auth.SignInWithCredentialAsync(credential).ContinueWith(task =>
+            rgnCore.Auth.SignInWithCredentialAsync(credential).ContinueWith(task =>
             {
                 if (task.IsCanceled)
                 {
@@ -236,9 +237,9 @@ namespace RGN.Modules.FacebookSignIn
                     return;
                 }
 
-                rgnCore.Dependencies.Logger.Log("Sign In with Facebook Successful. " + rgnCore.auth.CurrentUser.UserId);
+                rgnCore.Dependencies.Logger.Log("Sign In with Facebook Successful. " + rgnCore.Auth.CurrentUser.UserId);
 
-                rgnCore.auth.CurrentUser.TokenAsync(false).ContinueWith(task1 =>
+                rgnCore.Auth.CurrentUser.TokenAsync(false).ContinueWith(task1 =>
                 {
                     if (task1.IsCanceled)
                     {
@@ -259,7 +260,7 @@ namespace RGN.Modules.FacebookSignIn
                     {
                         rgnCore.Dependencies.Logger.Log("[FacebookSignInModule]: Facebook, masterToken " + task2.Result);
 
-                        rgnCore.readyMasterAuth.SignInWithCustomTokenAsync(task2.Result);
+                        rgnCore.ReadyMasterAuth.SignInWithCustomTokenAsync(task2.Result);
                     },
                     TaskScheduler.FromCurrentSynchronizationContext());
                 },
