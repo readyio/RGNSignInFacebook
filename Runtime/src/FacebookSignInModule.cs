@@ -86,7 +86,7 @@ namespace RGN.Modules.FacebookSignIn
                     {
                         if (isLink)
                         {
-                            rgnCore.IsUserCanBeLinked(FB.Mobile.CurrentProfile().Email).ContinueWith(checkLinkResult =>
+                            rgnCore.IsUserCanBeLinkedAsync(FB.Mobile.CurrentProfile().Email).ContinueWith(checkLinkResult =>
                             {
                                 if (checkLinkResult.IsCanceled)
                                 {
