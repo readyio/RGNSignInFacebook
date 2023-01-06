@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RGN.Modules.FacebookSignIn
+namespace RGN.Modules.SignIn
 {
-    public class FacebookSignInModule : IRGNModule
+    public class FacebookSignInModule : BaseModule<FacebookSignInModule>, IRGNModule
     {
         private IRGNRolesCore rgnCore;
 
