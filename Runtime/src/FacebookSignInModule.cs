@@ -37,11 +37,11 @@ namespace RGN.Modules.SignIn
             {
                 // Signal an app activation App Event
                 FB.ActivateApp();
-                rgnCore.Dependencies.Logger.Log("[RGNManager]: FB, Initialized the Facebook SDK");
+                rgnCore.Dependencies.Logger.Log("[FacebookSignInModule]: FB, Initialized the Facebook SDK");
             }
             else
             {
-                rgnCore.Dependencies.Logger.Log("[RGNManager]: FB, Failed to Initialize the Facebook SDK");
+                rgnCore.Dependencies.Logger.Log("[FacebookSignInModule]: FB, Failed to Initialize the Facebook SDK");
             }
         }
 
@@ -71,31 +71,31 @@ namespace RGN.Modules.SignIn
         public void OnSignInFacebook(bool isLink = false)
         {
             var perms = new List<string> { "public_profile", "email" };
-            FB.LogInWithReadPermissions(perms, result =>
-            {
+            FB.LogInWithReadPermissions(perms, result => {
                 if (FB.IsLoggedIn)
                 {
                     AccessToken aToken = AccessToken.CurrentAccessToken;
 
                     if (FB.Mobile.CurrentProfile() != null)
                     {
-                        rgnCore.Dependencies.Logger.Log($"[RGNManager]: FB, name: {FB.Mobile.CurrentProfile().Name}, email: {FB.Mobile.CurrentProfile().Email}");
+                        rgnCore.Dependencies.Logger.Log($"[FacebookSignInModule]: FB, name: {FB.Mobile.CurrentProfile().Name}, email: {FB.Mobile.CurrentProfile().Email}");
                     }
 
                     if (aToken != null && aToken.Permissions.Contains("email"))
                     {
                         if (isLink)
                         {
-                            rgnCore.IsUserCanBeLinkedAsync(FB.Mobile.CurrentProfile().Email).ContinueWith(checkLinkResult =>
-                            {
+                            rgnCore.IsUserCanBeLinkedAsync(FB.Mobile.CurrentProfile().Email).ContinueWith(checkLinkResult => {
                                 if (checkLinkResult.IsCanceled)
                                 {
+                                    rgnCore.Dependencies.Logger.LogWarning("[FacebookSignInModule]: IsUserCanBeLinkedAsync was cancelled");
                                     SignOutFromFacebook();
                                     return;
                                 }
 
                                 if (checkLinkResult.IsFaulted)
                                 {
+                                    Utility.ExceptionHelper.PrintToLog(rgnCore.Dependencies.Logger, checkLinkResult.Exception);
                                     SignOutFromFacebook();
                                     rgnCore.SetAuthCompletion(EnumLoginState.Error, EnumLoginError.Unknown);
                                     return;
@@ -125,7 +125,7 @@ namespace RGN.Modules.SignIn
                 }
                 else
                 {
-                    rgnCore.Dependencies.Logger.Log("[RGNManager]: FB, User cancelled login");
+                    rgnCore.Dependencies.Logger.Log("[FacebookSignInModule]: FB, User cancelled login");
                     rgnCore.SetAuthCompletion(EnumLoginState.Error, EnumLoginError.Unknown);
                 }
             });
@@ -133,14 +133,14 @@ namespace RGN.Modules.SignIn
 
         private void LinkFacebookAccountToFirebase(string accessToken)
         {
-            rgnCore.Dependencies.Logger.Log("[RGNManager]: FB, Attempting to sign with Facebook...");
+            rgnCore.Dependencies.Logger.Log("[FacebookSignInModule]: FB, Attempting to sign with Facebook...");
 
             var credential = rgnCore.Auth.faceBookAuthProvider.GetCredential(accessToken);
 
-            rgnCore.Auth.CurrentUser.LinkAndRetrieveDataWithCredentialAsync(credential).ContinueWith(task =>
-            {
+            rgnCore.Auth.CurrentUser.LinkAndRetrieveDataWithCredentialAsync(credential).ContinueWith(task => {
                 if (task.IsCanceled)
                 {
+                    rgnCore.Dependencies.Logger.LogWarning("[FacebookSignInModule]: LinkAndRetrieveDataWithCredentialAsync was cancelled");
                     if (FB.IsLoggedIn)
                     {
                         FB.LogOut();
@@ -150,6 +150,7 @@ namespace RGN.Modules.SignIn
 
                 if (task.IsFaulted)
                 {
+                    Utility.ExceptionHelper.PrintToLog(rgnCore.Dependencies.Logger, task.Exception);
                     FirebaseAccountLinkException firebaseAccountLinkException = task.Exception.InnerException as FirebaseAccountLinkException;
                     if (firebaseAccountLinkException != null && firebaseAccountLinkException.ErrorCode == (int)AuthError.CredentialAlreadyInUse)
                     {
@@ -181,24 +182,24 @@ namespace RGN.Modules.SignIn
                     return;
                 }
 
-                rgnCore.Dependencies.Logger.Log("LinkWith Facebook Successful. " + rgnCore.Auth.CurrentUser.UserId + " ");
+                rgnCore.Dependencies.Logger.Log("[FacebookSignInModule]: LinkWith Facebook Successful. " + rgnCore.Auth.CurrentUser.UserId + " ");
 
-                rgnCore.Auth.CurrentUser.TokenAsync(false).ContinueWith(task1 =>
-                {
+                rgnCore.Auth.CurrentUser.TokenAsync(false).ContinueWith(task1 => {
                     if (task1.IsCanceled)
                     {
+                        rgnCore.Dependencies.Logger.LogWarning("[FacebookSignInModule]: TokenAsync was cancelled");
                         SignOutFromFacebook();
                         return;
                     }
                     if (task1.IsFaulted)
                     {
+                        Utility.ExceptionHelper.PrintToLog(rgnCore.Dependencies.Logger, task1.Exception);
                         SignOutFromFacebook();
                         rgnCore.SetAuthCompletion(EnumLoginState.Error, EnumLoginError.Unknown);
                         return;
                     }
 
-                    rgnCore.LinkWithProviderAsync(false, task1.Result).ContinueWith(task2 =>
-                    {
+                    rgnCore.LinkWithProviderAsync(false, task1.Result).ContinueWith(task2 => {
                         rgnCore.SetAuthCompletion(EnumLoginState.Success, EnumLoginError.Ok);
                     },
                     TaskScheduler.FromCurrentSynchronizationContext());
@@ -209,19 +210,20 @@ namespace RGN.Modules.SignIn
 
         private void SignInWithFacebookOnFirebase(string accessToken)
         {
-            rgnCore.Dependencies.Logger.Log("[RGNManager]: FB, Attempting to sign with Facebook...");
+            rgnCore.Dependencies.Logger.Log("[FacebookSignInModule]: FB, Attempting to sign with Facebook...");
 
             var credential = rgnCore.Auth.faceBookAuthProvider.GetCredential(accessToken);
 
-            rgnCore.Auth.SignInWithCredentialAsync(credential).ContinueWith(task =>
-            {
+            rgnCore.Auth.SignInWithCredentialAsync(credential).ContinueWith(task => {
                 if (task.IsCanceled)
                 {
+                    rgnCore.Dependencies.Logger.LogWarning("[FacebookSignInModule]: SignInWithCredentialAsync was cancelled");
                     SignOutFromFacebook();
                     return;
                 }
                 if (task.IsFaulted)
                 {
+                    Utility.ExceptionHelper.PrintToLog(rgnCore.Dependencies.Logger, task.Exception);
                     FirebaseException firebaseException = task.Exception.InnerException.InnerException as FirebaseException;
                     if (firebaseException != null && firebaseException.ErrorCode == (int)AuthError.AccountExistsWithDifferentCredentials)
                     {
@@ -237,18 +239,19 @@ namespace RGN.Modules.SignIn
                     return;
                 }
 
-                rgnCore.Dependencies.Logger.Log("Sign In with Facebook Successful. " + rgnCore.Auth.CurrentUser.UserId);
+                rgnCore.Dependencies.Logger.Log("[FacebookSignInModule]: Sign In with Facebook Successful. " + rgnCore.Auth.CurrentUser.UserId);
 
-                rgnCore.Auth.CurrentUser.TokenAsync(false).ContinueWith(task1 =>
-                {
+                rgnCore.Auth.CurrentUser.TokenAsync(false).ContinueWith(task1 => {
                     if (task1.IsCanceled)
                     {
+                        rgnCore.Dependencies.Logger.LogWarning("[FacebookSignInModule]: TokenAsync was cancelled");
                         SignOutFromFacebook();
                         return;
                     }
 
                     if (task1.IsFaulted)
                     {
+                        Utility.ExceptionHelper.PrintToLog(rgnCore.Dependencies.Logger, task1.Exception);
                         SignOutFromFacebook();
                         rgnCore.SetAuthCompletion(EnumLoginState.Error, EnumLoginError.Unknown);
                         return;
@@ -256,8 +259,7 @@ namespace RGN.Modules.SignIn
 
                     rgnCore.Dependencies.Logger.Log("[FacebookSignInModule]: Facebook, userToken " + task1.Result);
 
-                    rgnCore.CreateCustomTokenAsync(task1.Result).ContinueWith(task2 =>
-                    {
+                    rgnCore.CreateCustomTokenAsync(task1.Result).ContinueWith(task2 => {
                         rgnCore.Dependencies.Logger.Log("[FacebookSignInModule]: Facebook, masterToken " + task2.Result);
 
                         rgnCore.ReadyMasterAuth.SignInWithCustomTokenAsync(task2.Result);
