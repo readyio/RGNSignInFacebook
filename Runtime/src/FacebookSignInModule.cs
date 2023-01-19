@@ -59,7 +59,7 @@ namespace RGN.Modules.SignIn
             }
         }
 
-        public void SignOutFromFacebook()
+        public void SignOut()
         {
             if (FB.IsLoggedIn)
             {
@@ -68,7 +68,7 @@ namespace RGN.Modules.SignIn
             rgnCore.SignOutRGN();
         }
 
-        public void OnSignInFacebook(bool isLink = false)
+        public void TryToSignIn(bool tryToLinkToCurrentAccount = false)
         {
             var perms = new List<string> { "public_profile", "email" };
             FB.LogInWithReadPermissions(perms, result => {
@@ -83,20 +83,20 @@ namespace RGN.Modules.SignIn
 
                     if (aToken != null && aToken.Permissions.Contains("email"))
                     {
-                        if (isLink)
+                        if (tryToLinkToCurrentAccount)
                         {
-                            rgnCore.IsUserCanBeLinkedAsync(FB.Mobile.CurrentProfile().Email).ContinueWith(checkLinkResult => {
+                            rgnCore.CanTheUserBeLinkedAsync(FB.Mobile.CurrentProfile().Email).ContinueWith(checkLinkResult => {
                                 if (checkLinkResult.IsCanceled)
                                 {
                                     rgnCore.Dependencies.Logger.LogWarning("[FacebookSignInModule]: IsUserCanBeLinkedAsync was cancelled");
-                                    SignOutFromFacebook();
+                                    SignOut();
                                     return;
                                 }
 
                                 if (checkLinkResult.IsFaulted)
                                 {
                                     Utility.ExceptionHelper.PrintToLog(rgnCore.Dependencies.Logger, checkLinkResult.Exception);
-                                    SignOutFromFacebook();
+                                    SignOut();
                                     rgnCore.SetAuthCompletion(EnumLoginState.Error, EnumLoginError.Unknown);
                                     return;
                                 }
@@ -104,7 +104,8 @@ namespace RGN.Modules.SignIn
                                 bool canBeLinked = (bool)checkLinkResult.Result.Data;
                                 if (!canBeLinked)
                                 {
-                                    SignOutFromFacebook();
+                                    rgnCore.Dependencies.Logger.LogError("[FacebookSignInModule]: The User can not be linked");
+                                    SignOut();
                                     rgnCore.SetAuthCompletion(EnumLoginState.Error, EnumLoginError.AccountAlreadyLinked);
                                     return;
                                 }
@@ -195,13 +196,13 @@ namespace RGN.Modules.SignIn
                     if (task1.IsCanceled)
                     {
                         rgnCore.Dependencies.Logger.LogWarning("[FacebookSignInModule]: TokenAsync was cancelled");
-                        SignOutFromFacebook();
+                        SignOut();
                         return;
                     }
                     if (task1.IsFaulted)
                     {
                         Utility.ExceptionHelper.PrintToLog(rgnCore.Dependencies.Logger, task1.Exception);
-                        SignOutFromFacebook();
+                        SignOut();
                         rgnCore.SetAuthCompletion(EnumLoginState.Error, EnumLoginError.Unknown);
                         return;
                     }
@@ -225,7 +226,7 @@ namespace RGN.Modules.SignIn
                 if (task.IsCanceled)
                 {
                     rgnCore.Dependencies.Logger.LogWarning("[FacebookSignInModule]: SignInWithCredentialAsync was cancelled");
-                    SignOutFromFacebook();
+                    SignOut();
                     return;
                 }
                 if (task.IsFaulted)
@@ -241,7 +242,7 @@ namespace RGN.Modules.SignIn
                         rgnCore.SetAuthCompletion(EnumLoginState.Error, EnumLoginError.AccountExistsWithDifferentCredentials);
                         return;
                     }
-                    SignOutFromFacebook();
+                    SignOut();
                     rgnCore.SetAuthCompletion(EnumLoginState.Error, EnumLoginError.Unknown);
                     return;
                 }
@@ -252,14 +253,14 @@ namespace RGN.Modules.SignIn
                     if (task1.IsCanceled)
                     {
                         rgnCore.Dependencies.Logger.LogWarning("[FacebookSignInModule]: TokenAsync was cancelled");
-                        SignOutFromFacebook();
+                        SignOut();
                         return;
                     }
 
                     if (task1.IsFaulted)
                     {
                         Utility.ExceptionHelper.PrintToLog(rgnCore.Dependencies.Logger, task1.Exception);
-                        SignOutFromFacebook();
+                        SignOut();
                         rgnCore.SetAuthCompletion(EnumLoginState.Error, EnumLoginError.Unknown);
                         return;
                     }
