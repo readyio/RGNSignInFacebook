@@ -101,7 +101,7 @@ namespace RGN.Modules.SignIn
                                     return;
                                 }
 
-                                bool canBeLinked = (bool)checkLinkResult.Result.Data;
+                                bool canBeLinked = checkLinkResult.Result;
                                 if (!canBeLinked)
                                 {
                                     rgnCore.Dependencies.Logger.LogError("[FacebookSignInModule]: The User can not be linked");
