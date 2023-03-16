@@ -1,2 +1,2 @@
 # RGN SignInFacebook
-version: 0.1.0-dev.112
+version: 0.1.0-dev.113
